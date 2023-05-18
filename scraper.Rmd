@@ -11,6 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(rvest)
 library(dplyr)
 library(pbapply)
+library(here)
+source('./R/fileCache.R')
+source('./R/runIfExpired.R')
+
 ```
 
 
@@ -56,8 +60,11 @@ scrape_func <- function(stateid){
 
 }
 
-all.states <- pblapply(state.abb,scrape_func) %>%
-  bind_rows()
+nrevss <- runIfExpired('nrevss', maxage = 168, ~pblapply(state.abb,scrape_func) %>%
+  bind_rows()  )
+
+# all.states <- pblapply(state.abb,scrape_func) %>%
+#   bind_rows()
 
 
 ```
