@@ -10,7 +10,9 @@ knitr::opts_chunk$set(echo = TRUE)
 # Load required libraries
 library(rvest)
 library(dplyr)
+library(lubridate)
 library(pbapply)
+library(ggplot2)
 library(here)
 source('./R/fileCache.R')
 source('./R/runIfExpired.R')
@@ -21,8 +23,27 @@ source('./R/scraper_func.R')
 
 ```{r}
 
-nrevss <- runIfExpired('nrevss', maxage = 168, ~pblapply(state.abb,scrape_func) %>%
+nrevss <- runIfExpired('nrevss', maxage = hours(168), ~pblapply(state.abb,scrape_func) %>%
   bind_rows()  )
 
 ```
 
+
+```{r}
+region <-  runIfExpired('nrevss_region', maxage = hours(999999), ~
+                          read.csv("https://data.cdc.gov/api/views/52kb-ccu2/rows.csv?accessType=DOWNLOAD")
+) %>%
+  group_by(HHS.region, Week.ending.Date) %>%
+  summarize(RSV.Tests=sum(RSV.Tests)) %>%
+  mutate( Week.ending.Date = as.Date( Week.ending.Date, '%d%b%Y'))
+```
+
+
+```{r}
+p1 <- region %>%
+    filter(HHS.region %in% c(2,4)) %>%
+ggplot( aes(x=Week.ending.Date, y=RSV.Tests, group=HHS.region) )+
+  geom_line() +
+  theme_classic()
+p1
+```

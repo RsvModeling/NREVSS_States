@@ -21,8 +21,12 @@ scrape_func <- function(stateid){
     html_table(fill = TRUE)
   
   # Extract the desired table (in this case, it's the first table)
-  df1 <- table_data1[[1]]
-  df2 <- table_data2[[1]]
+  df1 <- table_data1[[1]] %>% 
+    dplyr::select(RepWeekDate,StateID,`Percent Positive`,`Total Antigen Detection Tests`) %>%
+    rename(PctPosAntigen= `Percent Positive`)
+  df2 <- table_data2[[1]]%>% 
+    dplyr::select(RepWeekDate,StateID,`Percent Positive`,`Total PCR Tests`) %>%
+    rename(PctPosPCR= `Percent Positive`)
   df3 <- table_data3[[1]]
   
   # Remove empty rows
